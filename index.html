@@ -158,10 +158,26 @@ body.sheet-open{padding-bottom:55vh}
     <label class="drop" id="drop">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/><path d="M9 15h6"/><path d="M12 12v6"/></svg>
       <strong id="dropT">Toque aqui para escolher o PDF</strong>
-      <span>O arquivo que veio pelo WhatsApp costuma ficar em Meus Arquivos → Downloads ou na pasta WhatsApp Documents.</span>
+      <span>Veio pelo WhatsApp? É mais fácil mandar de lá: veja como logo abaixo.</span>
       <input type="file" id="file" accept="application/pdf,.pdf" aria-label="Escolher PDF">
     </label>
     <p class="err" id="pickErr" hidden></p>
+    <details class="tips" style="margin-top:12px" open>
+      <summary>PDF que chegou pelo WhatsApp</summary>
+      <p style="margin:4px 0 6px"><b>Jeito mais fácil:</b></p>
+      <ol>
+        <li>No WhatsApp, abra a conversa e <b>segure o dedo</b> em cima do PDF.</li>
+        <li>Toque no ícone de <b>compartilhar</b> (os três pontinhos ligados, no alto da tela).</li>
+        <li>Escolha <b>Editar PDF</b> na lista. O documento abre direto aqui.</li>
+      </ol>
+      <p style="margin:10px 0 6px"><b>Se Editar PDF não aparecer na lista</b>, procure o arquivo pelo quadro acima:</p>
+      <ol>
+        <li>Toque no quadro. Na tela que abrir, toque em <b>☰</b> (canto de cima, à esquerda).</li>
+        <li>Se só aparecer "Recentes" e "Downloads", toque em <b>⋮</b> (canto de cima, à direita) e em <b>Mostrar armazenamento interno</b>. Depois toque em ☰ de novo.</li>
+        <li>Escolha o armazenamento do celular (aparece com o nome do aparelho, como <b>Galaxy J7 Prime</b>).</li>
+        <li>Abra as pastas <b>WhatsApp → Media → WhatsApp Documents</b>. Os PDFs mais novos ficam no fim ou no começo da lista.</li>
+      </ol>
+    </details>
     <p class="note"><button class="linkbtn" type="button" id="sampleBtn">Só quero testar: abrir um currículo de exemplo</button></p>
   </section>
 
@@ -666,7 +682,19 @@ $('#sampleBtn').addEventListener('click',function(){
 
 window.addEventListener('resize',function(){});
 if(!LIBS_OK)pickError('O aplicativo não carregou direito. Feche e abra de novo com internet.');
-if('serviceWorker' in navigator&&location.protocol==='https:'){navigator.serviceWorker.register('sw.js').catch(function(){});}
+// PDF que chegou pelo Compartilhar do WhatsApp
+if(/[?&]recebido=1/.test(location.search)&&window.caches){
+  try{history.replaceState(null,'',location.pathname);}catch(e){}
+  setBusy(true,'Abrindo o PDF recebido…');
+  caches.open('editar-pdf-recebido').then(function(c){
+    return c.match('./recebido.pdf').then(function(r){
+      if(!r){setBusy(false);pickError('O PDF compartilhado não chegou. Tente compartilhar de novo ou escolha pelo quadro acima.');return;}
+      var nm='documento.pdf';try{nm=decodeURIComponent(r.headers.get('X-Nome')||nm);}catch(e){}
+      return r.arrayBuffer().then(function(b){c.delete('./recebido.pdf');if(LIBS_OK)openBytes(new Uint8Array(b),nm);else setBusy(false);});
+    });
+  }).catch(function(){setBusy(false);pickError('Não consegui abrir o PDF compartilhado. Escolha pelo quadro acima.');});
+}
+if('serviceWorker' in navigator&&(location.protocol==='https:'||location.hostname==='localhost')){navigator.serviceWorker.register('sw.js').catch(function(){});}
 })();
 </script>
 </body>
