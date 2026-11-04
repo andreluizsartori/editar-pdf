@@ -6,7 +6,6 @@
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
-  "orientation": "portrait",
   "background_color": "#8f3a1e",
   "theme_color": "#8f3a1e",
   "icons": [
@@ -14,13 +13,19 @@
       "src": "icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     },
     {
       "src": "icon-512.png",
       "sizes": "512x512",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
+    },
+    {
+      "src": "icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ],
   "share_target": {
@@ -28,13 +33,11 @@
     "method": "POST",
     "enctype": "multipart/form-data",
     "params": {
-      "title": "title",
       "files": [
         {
           "name": "pdf",
           "accept": [
-            "application/pdf",
-            ".pdf"
+            "application/pdf"
           ]
         }
       ]
